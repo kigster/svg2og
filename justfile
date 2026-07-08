@@ -5,6 +5,7 @@
 export DEVELOPER_DIR := "/Applications/Xcode.app/Contents/Developer"
 
 version := `cat .version | tr -d '\n'`
+repo    := 'git@github.com:kigster/svg2og'
 
 prefix := "/usr/local"
 

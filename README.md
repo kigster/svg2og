@@ -1,3 +1,5 @@
+[![CI](https://github.com/kigster/svg2og/actions/workflows/ci.yml/badge.svg)](https://github.com/kigster/svg2og/actions/workflows/ci.yml)
+
 # svg-to-omnigraffle
 
 Convert SVG diagrams exported from [Mermaid](https://mermaid.js.org) so they import cleanly into [OmniGraffle](https://www.omnigroup.com/omnigraffle) — with all text labels present, correctly positioned, and without stray artifacts.

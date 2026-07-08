@@ -1,0 +1,96 @@
+name: release
+
+# Build prebuilt svg2og binaries and attach them to the GitHub Release for a
+# tag, so users can install via Homebrew (kigster/tap) without a Swift
+# toolchain. Manual-only by design: run it from the Actions tab (or
+# `gh workflow run release.yml -f tag=v0.1.0`) after pushing the tag.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to build and attach binaries to (e.g. v0.1.0)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  # A tag alone is not a GitHub Release object; create (or reuse) it first.
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ensure the GitHub release exists
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.event.inputs.tag }}
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists; reusing it."
+          else
+            gh release create "$TAG" --title "$TAG" --generate-notes
+          fi
+
+  upload:
+    name: ${{ matrix.target }}
+    needs: create-release
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: aarch64-apple-darwin
+            arch: arm64
+          # Cross-compiled on the Apple Silicon runner — GitHub is sunsetting
+          # the Intel macOS runners, and Xcode's toolchain builds x86_64 from
+          # arm64 natively via `swift build --arch`.
+          - target: x86_64-apple-darwin
+            arch: x86_64
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ github.event.inputs.tag }}
+
+      - name: Build release binary
+        run: swift build -c release --arch ${{ matrix.arch }}
+
+      - name: Package and upload
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.event.inputs.tag }}
+          TARGET: ${{ matrix.target }}
+        run: |
+          set -euo pipefail
+          BIN=$(swift build -c release --arch ${{ matrix.arch }} --show-bin-path)/svg2og
+          file "$BIN"
+          STAGE=$(mktemp -d)
+          cp "$BIN" "$STAGE/svg2og"
+          ARCHIVE="svg2og-${TARGET}.tar.gz"
+          tar -czf "$ARCHIVE" -C "$STAGE" svg2og
+          shasum -a 256 "$ARCHIVE" > "$ARCHIVE.sha256"
+          gh release upload "$TAG" "$ARCHIVE" "$ARCHIVE.sha256" --clobber
+
+  notify-tap:
+    name: refresh Homebrew formula
+    needs: upload
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger tap update-svg2og workflow
+        env:
+          TAG: ${{ github.event.inputs.tag }}
+          # A PAT with `repo` scope on kigster/homebrew-tap. Without it the
+          # tap is updated by running its update-svg2og workflow manually.
+          GH_TOKEN: ${{ secrets.TAP_DISPATCH_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${GH_TOKEN:-}" ]; then
+            echo "TAP_DISPATCH_TOKEN not set — skipping auto-update."
+            echo "Run the tap's update-svg2og workflow manually:"
+            echo "  gh workflow run update-svg2og.yml -R kigster/homebrew-tap -f tag=$TAG"
+            exit 0
+          fi
+          gh api "repos/kigster/homebrew-tap/dispatches" \
+            -f "event_type=svg2og-release" \
+            -f "client_payload[tag]=$TAG"

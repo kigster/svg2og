@@ -4,6 +4,8 @@
 # PackageDescription from Feb 2024); build with the full Xcode toolchain.
 export DEVELOPER_DIR := "/Applications/Xcode.app/Contents/Developer"
 
+version := `cat .version | tr -d '\n'`
+
 prefix := "/usr/local"
 
 # List available recipes
@@ -47,3 +49,10 @@ clean:
     rm -rf .build
     /usr/bin/find . -name '.DS_Store' -delete
 
+# Tag v{{ version }}, publish the GH release, & refresh the Homebrew tap.
+release:
+    git fetch --tags
+    git tag -f "v{{ version }}"
+    git push -f --tags
+    gh release delete -y "v{{ version }}" --repo {{ repo }} 2>/dev/null || true
+    gh release create "v{{ version }}" --generate-notes --repo {{ repo }}

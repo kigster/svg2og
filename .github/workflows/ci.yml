@@ -56,7 +56,7 @@ jobs:
 
       - name: Smoke-test CLI on sample fixture
         run: |
-          swift run svg2og Resources/html-labels.svg -o /tmp/out.svg
+          swift run svg2og Resources/load-balancer.svg -o /tmp/out.svg
           xmllint --noout /tmp/out.svg
           test "$(xmllint --xpath 'count(//*[local-name()="foreignObject"])' /tmp/out.svg)" = "0"
           test "$(xmllint --xpath 'count(//*[local-name()="text"])' /tmp/out.svg)" = "25"

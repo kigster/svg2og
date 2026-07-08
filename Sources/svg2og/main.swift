@@ -1,6 +1,8 @@
 import Foundation
 import SVGToOmniGraffleKit
 
+let version = "0.1.0"
+
 let usage = """
 Usage: svg2og [options] <input.svg>
 
@@ -11,6 +13,7 @@ Options:
       --no-labels       Keep <foreignObject> HTML labels as-is
       --no-tspans       Keep em-positioned <tspan> rows as-is
       --no-rects        Keep zero-size <rect/> placeholders
+  -V, --version         Show version
   -h, --help            Show this help
 """
 
@@ -29,6 +32,9 @@ while !arguments.isEmpty {
     switch argument {
     case "-h", "--help":
         print(usage)
+        exit(0)
+    case "-V", "--version":
+        print("svg2og \(version)")
         exit(0)
     case "-o", "--output":
         guard !arguments.isEmpty else { fail("\(argument) requires a file argument") }

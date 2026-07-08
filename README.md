@@ -10,9 +10,11 @@ Mermaid exports SVG meant for the web, so all the text labels are wrapped in a `
 
 So when you export a diagram with text to SVG and then open in OmniGraffle, you get this:
 
-![broken text](Resources/load-balancer-svg-omnigraffle-import.png)
+<p align="center">
+  <img src="Resources/load-balancer-svg-omnigraffle-import.png" width="70%" alt="OmniGraffle import of a raw Mermaid SVG: shapes and edges import, but all text labels are missing" />
+</p>
 
-When you run it throught this tool:
+When you run it through this tool:
 
 ```bash
 svg2og load-balancer.svg
@@ -20,7 +22,9 @@ svg2og load-balancer.svg
 
 It creates a file named `load-balancer.omnigraffle.svg`, which if you open in OmniGraffle appears this way:
 
-![fixed text](Resources/load-balancer-svg-omnigraffle-fixed-import.png)
+<p align="center">
+  <img src="Resources/load-balancer-svg-omnigraffle-fixed-import.png" width="70%" alt="OmniGraffle import of the converted SVG: all node, edge, and cluster labels are present and correctly positioned" />
+</p>
 
 ## The Problem
 
@@ -112,14 +116,12 @@ flowchart TD
 
 The tspan-positioning and dot-artifact quirks still apply, so running the converter is useful even then.
 
-
-
 ## Development
 
 ```bash
 just build     # debug build
 just test      # run the test suite
-just run Resources/html-labels.svg   # convert the sample fixture
+just run Resources/load-balancer.svg   # convert the sample fixture
 ```
 
 Sample Mermaid exports for experimenting live in `Resources/`.

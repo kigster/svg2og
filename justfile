@@ -50,7 +50,7 @@ clean:
     /usr/bin/find . -name '.DS_Store' -delete
 
 # Tag v{{ version }}, publish the GH release, & refresh the Homebrew tap.
-release:
+publish:
     git fetch --tags
     git tag -f "v{{ version }}"
     git push -f --tags

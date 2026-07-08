@@ -2,6 +2,26 @@
 
 Convert SVG diagrams exported from [Mermaid](https://mermaid.js.org) so they import cleanly into [OmniGraffle](https://www.omnigroup.com/omnigraffle) — with all text labels present, correctly positioned, and without stray artifacts.
 
+## Examples
+
+### Default Export to SVG from Mermaid
+
+Mermaid exports SVG meant for the web, so all the text labels are wrapped in a `foreignObject` and contain HTML inside.
+
+So when you export a diagram with text to SVG and then open in OmniGraffle, you get this:
+
+![broken text](Resources/load-balancer-svg-omnigraffle-import.png)
+
+When you run it throught this tool:
+
+```bash
+svg2og load-balancer.svg
+```
+
+It creates a file named `load-balancer.omnigraffle.svg`, which if you open in OmniGraffle appears this way:
+
+![fixed text](Resources/load-balancer-svg-omnigraffle-fixed-import.png)
+
 ## The Problem
 
 Mermaid exports SVG with `htmlLabels: true` by default, which renders every node label as a `<foreignObject>` element containing embedded HTML (`<div><span><p>…`). Browsers render this fine, but OmniGraffle's SVG importer has no HTML engine and silently drops these elements — you get a diagram of empty boxes.
@@ -91,6 +111,8 @@ flowchart TD
 ```
 
 The tspan-positioning and dot-artifact quirks still apply, so running the converter is useful even then.
+
+
 
 ## Development
 

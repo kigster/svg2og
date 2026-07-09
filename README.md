@@ -57,8 +57,8 @@ Without `-o`, output goes to `<input>.omnigraffle.svg`.
 Requires macOS with Xcode (the converter uses Foundation's `XMLDocument`).
 
 ```bash
-git clone https://github.com/kigster/svg-to-omnigraffle.git
-cd svg-to-omnigraffle
+git clone https://github.com/kigster/svg2og.git
+cd svg2og
 just setup     # verifies the Swift toolchain
 just install   # builds release binary, installs to /usr/local/bin/svg2og
 ```
